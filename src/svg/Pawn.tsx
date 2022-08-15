@@ -1,0 +1,68 @@
+import React from "react";
+import styled from "styled-components";
+import { ICell, IPiece } from "./Piece";
+
+const SVG = styled.svg`
+  opacity: 1; 
+  fill:  ${props => (props.color===`black` ? `#000000`:  `#ffffff;`)}; 
+  fill-opacity: 1; 
+  fill-rule: nonzero; 
+  stroke: ${props => (props.color===`black` ? `#ffffff`:  `#000000;`)};
+  stroke-width: 1.5; 
+  stroke-linecap: round; 
+  stroke-linejoin: miter; 
+  stroke-miterlimit: 4; 
+  stroke-dasharray: none; 
+  stroke-opacity: 1;
+`;
+
+export class Pawn implements IPiece {
+
+  color: string;
+  name: string;
+
+  constructor(color: string) {
+    this.color = color;
+    this.name = 'pawn';
+  }
+  
+  movement(cell: ICell, pieces: (IPiece | undefined)[][]) {
+    const moves: ICell[] = []
+    if (this.color === 'white') {
+      if (cell.row === 1 && pieces[cell.row+2][cell.column] === undefined) {
+        moves.push({ row: cell.row + 2, column: cell.column })
+      } 
+      if(pieces[cell.row + 1][cell.column] === undefined) {
+        moves.push({ row: cell.row + 1, column: cell.column })
+      }
+      if(pieces[cell.row + 1][cell.column + 1]?.color === 'black') {
+        moves.push({ row: cell.row + 1, column: cell.column + 1 })
+      }
+      if(pieces[cell.row + 1][cell.column - 1]?.color === 'black') {
+        moves.push({ row: cell.row + 1, column: cell.column - 1 })
+      }
+    } else {
+      if (cell.row === 6 && pieces[cell.row-2][cell.column] === undefined) {
+        moves.push({ row: cell.row - 2, column: cell.column })
+      } 
+      if(pieces[cell.row-1][cell.column] === undefined) {
+        moves.push({ row: cell.row - 1, column: cell.column })
+      }
+      if(pieces[cell.row-1][cell.column-1]?.color === 'white') {
+        moves.push({ row: cell.row - 1, column: cell.column - 1 })
+      }
+      if(pieces[cell.row-1][cell.column+1]?.color === 'white') {
+        moves.push({ row: cell.row - 1, column: cell.column + 1 })
+      }
+    }
+    return moves;
+  }
+
+  icon() {
+    return (
+      <SVG xmlns="http: //www.w3.org/2000/svg" version="1.1" width="45" height="45" color={this.color}>
+        <path d="m 22.5,9 c -2.21,0 -4,1.79 -4,4 0,0.89 0.29,1.71 0.78,2.38 C 17.33,16.5 16,18.59 16,21 c 0,2.03 0.94,3.84 2.41,5.03 C 15.41,27.09 11,31.58 11,39.5 H 34 C 34,31.58 29.59,27.09 26.59,26.03 28.06,24.84 29,23.03 29,21 29,18.59 27.67,16.5 25.72,15.38 26.21,14.71 26.5,13.89 26.5,13 c 0,-2.21 -1.79,-4 -4,-4 z" />
+      </SVG>
+    );
+  }
+}
