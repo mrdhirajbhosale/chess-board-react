@@ -1,11 +1,12 @@
 import styled from "styled-components";
+import { king_movement } from "../utils";
 import { ICell, IPiece } from "./Piece";
 
 const SVG = styled.svg`
   fill: none;
   fill-opacity: 1; 
   fill-rule: evenodd; 
-  stroke: ${props => (props.color === `black` ? `#ffffff` :  `#000000;`)};
+  stroke: ${props => (props.color === `black` ? `#ffffff` : `#000000;`)};
   stroke-width: 1.5; 
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -16,13 +17,13 @@ const SVG = styled.svg`
 
 const PathUpper = styled.path`
   fill: none;
-  stroke: ${props => (props.color === `black` ? `#ffffff` :  `#000000;`)};
+  stroke: ${props => (props.color === `black` ? `#ffffff` : `#000000;`)};
   stroke-linejoin: miter;
 `;
 
 const PatchMiddleBottom = styled.path`
-  fill: ${props => (props.color === `black` ? `#000000` :  `#ffffff;`)};
-  stroke: ${props => (props.color === `black` ? `#ffffff` :  `#000000;`)};
+  fill: ${props => (props.color === `black` ? `#000000` : `#ffffff;`)};
+  stroke: ${props => (props.color === `black` ? `#ffffff` : `#000000;`)};
 `;
 
 const PatchMiddleUpper = styled(PatchMiddleBottom)`
@@ -32,10 +33,10 @@ const PatchMiddleUpper = styled(PatchMiddleBottom)`
 
 const PathBottom = styled.path`
   fill: none; 
-  stroke: ${props => (props.color === `black` ? `#ffffff` :  `#000000;`)};
+  stroke: ${props => (props.color === `black` ? `#ffffff` : `#000000;`)};
 `
 
-export class King  implements IPiece {
+export class King implements IPiece {
 
   color: string;
   name: string;
@@ -46,19 +47,10 @@ export class King  implements IPiece {
   }
 
   movement(cell: ICell, pieces: (IPiece | undefined)[][]) {
-    let moves: ICell[] = [];
-    moves.push({row: cell.row, column: cell.column+1})
-    moves.push({row: cell.row, column: cell.column-1})
-    moves.push({row: cell.row+1, column: cell.column})
-    moves.push({row: cell.row-1, column: cell.column})
-    moves.push({row: cell.row+1, column: cell.column+1})
-    moves.push({row: cell.row+1, column: cell.column-1})
-    moves.push({row: cell.row-1, column: cell.column-1})
-    moves.push({row: cell.row-1, column: cell.column+1})
-    return moves.filter(move => (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === this.color));
+    return king_movement(cell, pieces, this.color);
   }
 
-  icon()  {
+  icon() {
     return (
       <SVG xmlns="http: //www.w3.org/2000/svg" version="1.1" width="45" height="45" color={this.color}>
         <PathUpper d="M 22.5,11.63 L 22.5,6" color={this.color} />

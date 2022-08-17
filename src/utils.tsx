@@ -1,5 +1,21 @@
 import { ICell, IPiece } from "./svg/Piece";
 
+export function king_movement(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {
+    let moves: ICell[] = [];
+    moves.push({row: cell.row, column: cell.column+1})
+    moves.push({row: cell.row, column: cell.column-1})
+    moves.push({row: cell.row+1, column: cell.column})
+    moves.push({row: cell.row-1, column: cell.column})
+    moves.push({row: cell.row+1, column: cell.column+1})
+    moves.push({row: cell.row+1, column: cell.column-1})
+    moves.push({row: cell.row-1, column: cell.column-1})
+    moves.push({row: cell.row-1, column: cell.column+1})
+    return moves.filter(
+      move => 
+        (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === color)
+    ).filter((check, index, checks_list) => checks_list.indexOf(check) !== index );
+}
+
 export function pawn_movement(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {
   const moves: ICell[] = []
   if (color === 'white') {
@@ -42,7 +58,6 @@ export function knight_movement(cell: ICell, pieces: (IPiece | undefined)[][], c
   moves.push({ row: cell.row - 2, column: cell.column + 1 })
   moves.push({ row: cell.row + 2, column: cell.column - 1 })
   moves.push({ row: cell.row + 2, column: cell.column + 1 })
-
   return moves.filter(move => (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === color));
 }
 
@@ -141,3 +156,21 @@ export function move_straight(cell: ICell, pieces: (IPiece | undefined)[][], col
   }
   return moves;
 }
+
+export function check_king_check(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {
+  let checks: ICell[] = [];
+  const kingMoves = king_movement(cell, pieces, color).filter(check => pieces[check.row][check.column]?.name === 'king');
+  checks = checks.concat(kingMoves);
+  const pawnMoves = pawn_movement(cell, pieces, color).filter(check => pieces[check.row][check.column]?.name === 'pawn');
+  checks = checks.concat(pawnMoves);
+  const knightMoves = knight_movement(cell, pieces, color).filter(check => pieces[check.row][check.column]?.name === 'knight')
+  checks = checks.concat(knightMoves);
+  const diagonally_moves = move_diagonally(cell, pieces, color).filter(check => ['bishop', 'queen'].includes(pieces[check.row][check.column]?.name|| ''))
+  checks = checks.concat(diagonally_moves);
+  const straight_moves = move_straight(cell, pieces, color).filter(check => ['rook', 'queen'].includes(pieces[check.row][check.column]?.name|| ''))
+  checks = checks.concat(straight_moves);
+  return checks.filter(check =>
+    !(pieces[check.row][check.column]?.color === undefined || pieces[check.row][check.column]?.color === color)
+  );
+}
+
