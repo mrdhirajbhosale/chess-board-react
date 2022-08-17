@@ -1,6 +1,6 @@
-import React from "react";
 import styled from "styled-components";
-import { ICell, IPiece, move_diagonally, move_straight } from "./Piece";
+import { move_diagonally, move_straight } from "../utils";
+import { ICell, IPiece } from "./Piece";
 
 const SVG = styled.svg`
   fill: ${props => (props.color === `black` ? `#000000` : `#ffffff;`)};;

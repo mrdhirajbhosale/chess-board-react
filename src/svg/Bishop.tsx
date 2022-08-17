@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { ICell, IPiece, move_diagonally } from "./Piece";
+import { move_diagonally } from "../utils";
+import { ICell, IPiece } from "./Piece";
 
 const SVG = styled.svg`
   opacity:1; fill:none;

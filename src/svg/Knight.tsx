@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { knight_movement } from "../utils";
 import { ICell, IPiece } from "./Piece";
 
 const SVG = styled.svg`
@@ -37,17 +38,7 @@ export class Knight implements IPiece {
   }
 
   movement(cell: ICell, pieces: (IPiece | undefined)[][]) {
-    let moves: ICell[] = [];
-    moves.push({row: cell.row-1, column: cell.column-2})
-    moves.push({row: cell.row-1, column: cell.column+2})
-    moves.push({row: cell.row+1, column: cell.column-2})
-    moves.push({row: cell.row+1, column: cell.column+2})
-    moves.push({row: cell.row-2, column: cell.column-1})
-    moves.push({row: cell.row-2, column: cell.column+1})
-    moves.push({row: cell.row+2, column: cell.column-1})
-    moves.push({row: cell.row+2, column: cell.column+1})
-
-    return moves.filter(move => (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === this.color));
+    return knight_movement(cell, pieces, this.color);
   }
 
   icon()  {

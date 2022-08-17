@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { pawn_movement } from "../utils";
 import { ICell, IPiece } from "./Piece";
 
 const SVG = styled.svg`
@@ -27,35 +28,7 @@ export class Pawn implements IPiece {
   }
   
   movement(cell: ICell, pieces: (IPiece | undefined)[][]) {
-    const moves: ICell[] = []
-    if (this.color === 'white') {
-      if (cell.row === 1 && pieces[cell.row+2][cell.column] === undefined) {
-        moves.push({ row: cell.row + 2, column: cell.column })
-      } 
-      if(pieces[cell.row + 1][cell.column] === undefined) {
-        moves.push({ row: cell.row + 1, column: cell.column })
-      }
-      if(pieces[cell.row + 1][cell.column + 1]?.color === 'black') {
-        moves.push({ row: cell.row + 1, column: cell.column + 1 })
-      }
-      if(pieces[cell.row + 1][cell.column - 1]?.color === 'black') {
-        moves.push({ row: cell.row + 1, column: cell.column - 1 })
-      }
-    } else {
-      if (cell.row === 6 && pieces[cell.row-2][cell.column] === undefined) {
-        moves.push({ row: cell.row - 2, column: cell.column })
-      } 
-      if(pieces[cell.row-1][cell.column] === undefined) {
-        moves.push({ row: cell.row - 1, column: cell.column })
-      }
-      if(pieces[cell.row-1][cell.column-1]?.color === 'white') {
-        moves.push({ row: cell.row - 1, column: cell.column - 1 })
-      }
-      if(pieces[cell.row-1][cell.column+1]?.color === 'white') {
-        moves.push({ row: cell.row - 1, column: cell.column + 1 })
-      }
-    }
-    return moves;
+    return pawn_movement(cell, pieces, this.color);
   }
 
   icon() {
