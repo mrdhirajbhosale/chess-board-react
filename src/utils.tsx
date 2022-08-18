@@ -11,7 +11,7 @@ export function king_movement(cell: ICell, pieces: (IPiece | undefined)[][], col
     moves.push({row: cell.row-1, column: cell.column-1})
     moves.push({row: cell.row-1, column: cell.column+1})
     return moves.filter(
-      move => 
+      move =>
         (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === color)
     ).filter((check, index, checks_list) => checks_list.indexOf(check) !== index );
 }
@@ -174,3 +174,55 @@ export function check_king_check(cell: ICell, pieces: (IPiece | undefined)[][], 
   );
 }
 
+function get_moves_towords_king(king_cell: ICell, other_cell: ICell) {
+  let startMove = 0;
+  let endMove = 0;
+  let diff_x = 0;
+  let diff_y = 0;
+  let incr = 0;
+  var x1 = king_cell.row;
+  var y1 = king_cell.column;
+  var x2 = other_cell.row;
+  var y2 = other_cell.column;
+  const moves: ICell[] = []
+  if (x1!==x2) {
+    diff_x = x1 - x2 > 0? 1: -1;
+    incr =  diff_x;
+    startMove = x2;
+    endMove = x1;
+  }
+  if (y1 !== y2) {
+    diff_y = y1 - y2 > 0? 1: -1;
+    incr = diff_y;
+    startMove = y2;
+    endMove = y1;
+  }
+  while(startMove !== endMove) {
+    x2+=diff_x
+    y2+=diff_y
+    moves.push({row: x2, column: y2})
+    startMove+=incr
+  }
+  return moves;
+}
+
+export function moves_in_king_and_opponent(cell: ICell, king_checks: ICell[], pieces: (IPiece | undefined)[][]) {
+  const moves: ICell[][] = [];
+  king_checks.forEach((check)=> {
+    switch(pieces[check.row][check.column]?.name) {
+      case 'king':
+      case 'knight':
+      case 'pawn':
+        moves.push(king_checks);
+        break;
+      case 'bishop':
+      case 'rook':
+      case 'queen':
+        moves.push(get_moves_towords_king(cell, check));
+        break;
+      default:
+        moves.push([]);
+    }
+  })
+  return moves;
+}
