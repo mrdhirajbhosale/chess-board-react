@@ -10,10 +10,7 @@ export function king_movement(cell: ICell, pieces: (IPiece | undefined)[][], col
     moves.push({row: cell.row+1, column: cell.column-1})
     moves.push({row: cell.row-1, column: cell.column-1})
     moves.push({row: cell.row-1, column: cell.column+1})
-    return moves.filter(
-      move =>
-        (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === color)
-    ).filter((check, index, checks_list) => checks_list.indexOf(check) !== index );
+    return moves.filter(move => (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === color));
 }
 
 export function pawn_movement(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {

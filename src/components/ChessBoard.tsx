@@ -50,13 +50,17 @@ type IKingCell = {
   [key: string]: ICell
 }
 
+type IKingChecks = {
+  [key: string]: ICell[]
+}
+
 type IState = {
   pieces: (IPiece | undefined)[][];
   selected: ISelected;
   deathPieces: IPiece[];
   turn: 'white' | 'black';
   posibleMoves: ICell[];
-  kingChecks: ICell[];
+  kingChecks: IKingChecks;
   kingCell: IKingCell;
   afterCheckMoves: ICell[][];
 }
@@ -78,7 +82,7 @@ class ChessBoard extends React.Component<{}, IState> {
       deathPieces: [],
       turn: 'white',
       posibleMoves: [],
-      kingChecks: [],
+      kingChecks: {},
       kingCell: { white: { row: 0, column: 0 }, black: { row: 0, column: 0 } },
       afterCheckMoves: []
     }
@@ -140,16 +144,12 @@ class ChessBoard extends React.Component<{}, IState> {
   }
 
   getKingChecks( selected: ISelected) {
-    const { kingCell } = this.state;
-    let kingChecks: ICell[] = [];
+    const { kingCell, kingChecks } = this.state;
     let afterCheckMoves: ICell[][] = [];
-    if (selected.piece?.color === 'black'){
-      kingChecks = check_king_check(kingCell.white, this.state.pieces, 'white');
-      afterCheckMoves = moves_in_king_and_opponent(kingCell.white, kingChecks, this.state.pieces);
-    } else {
-      kingChecks = check_king_check(kingCell.black, this.state.pieces, 'black');
-      afterCheckMoves = moves_in_king_and_opponent(kingCell.black, kingChecks, this.state.pieces);
-    }
+    kingChecks['white'] = check_king_check(kingCell.white, this.state.pieces, 'white');
+    kingChecks['black'] = check_king_check(kingCell.black, this.state.pieces, 'black');
+    afterCheckMoves = moves_in_king_and_opponent(kingCell.white, kingChecks['white'], this.state.pieces);
+    afterCheckMoves = afterCheckMoves.concat(moves_in_king_and_opponent(kingCell.black, kingChecks['black'], this.state.pieces));
     this.setState({ kingChecks, afterCheckMoves });
   }
 
@@ -201,7 +201,7 @@ class ChessBoard extends React.Component<{}, IState> {
   }
 
   getBorderColor(row: number, column: number) {
-    if(this.isCellPresent(row, column, this.state.kingChecks)) {
+    if (Object.values(this.state.kingChecks).filter(moves => this.isCellPresent(row, column, moves)).length > 0) {
       return 1;
     }
     if(this.state.afterCheckMoves.filter(moves => this.isCellPresent(row, column, moves)).length > 0){
