@@ -250,7 +250,7 @@ class ChessBoard extends React.Component<{}, IState> {
 
   render() {
     return (
-      <div>
+      <>
         <ActionContainer>
           <TimeContainer>
             {this.state.timer.white/2}
@@ -298,7 +298,7 @@ class ChessBoard extends React.Component<{}, IState> {
           </TimeContainer>
         </ActionContainer>
         {/* <button onClick={this.initialPices} >Reset</button> */}
-      </div>
+      </>
     );
   }
 }

@@ -195,9 +195,9 @@ function get_moves_towords_king(king_cell: ICell, other_cell: ICell) {
     endMove = y1;
   }
   while(startMove !== endMove) {
+    moves.push({row: x2, column: y2})
     x2+=diff_x
     y2+=diff_y
-    moves.push({row: x2, column: y2})
     startMove+=incr
   }
   return moves;
