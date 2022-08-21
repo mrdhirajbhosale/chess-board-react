@@ -12,7 +12,8 @@ import { check_king_check, moves_in_king_and_opponent } from '../utils';
 const MainContainer = styled.div`
   display: flex;
   flex-direction: row;
-  margin-left: 80px;
+  justify-content: center;
+  align-item: center;
 `;
 
 const ChessContainer = styled.div`
@@ -40,6 +41,22 @@ const RowFlex = styled.div`
   display: flex;
 `
 
+const ActionContainer = styled(RowFlex)`
+  height: 60px;
+  justify-content: center;
+  align-item: center;
+`;
+
+const TimeContainer = styled.div`
+  margin: 10px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+`;
+
 type ISelected = {
   row: number,
   column: number,
@@ -54,6 +71,11 @@ type IKingChecks = {
   [key: string]: ICell[]
 }
 
+type ITimer = {
+  white: number,
+  black: number
+}
+
 type IState = {
   pieces: (IPiece | undefined)[][];
   selected: ISelected;
@@ -63,6 +85,8 @@ type IState = {
   kingChecks: IKingChecks;
   kingCell: IKingCell;
   afterCheckMoves: ICell[][];
+  timer: ITimer;
+  timerStart: Boolean
 }
 
 const COLOR_SIZE : {[key: number]: {color: string, size: string}} = {
@@ -84,8 +108,18 @@ class ChessBoard extends React.Component<{}, IState> {
       posibleMoves: [],
       kingChecks: {},
       kingCell: { white: { row: 0, column: 0 }, black: { row: 0, column: 0 } },
-      afterCheckMoves: []
+      afterCheckMoves: [],
+      timer: {white: 0, black: 0},
+      timerStart: true
     }
+  }
+
+  updateTimer(): void {
+    setInterval(() => {
+      const { timer, turn } = this.state;
+      timer[turn] = timer[turn] + 1;
+      this.setState({timer});
+    }, 1000);
   }
 
   initialPices(): void {
@@ -137,6 +171,7 @@ class ChessBoard extends React.Component<{}, IState> {
 
   componentDidMount() {
     this.initialPices();
+    this.updateTimer();
   }
 
   isCellPresent(row: number, column: number, cells: ICell[]) {
@@ -216,6 +251,11 @@ class ChessBoard extends React.Component<{}, IState> {
   render() {
     return (
       <div>
+        <ActionContainer>
+          <TimeContainer>
+            {this.state.timer.white/2}
+          </TimeContainer>
+        </ActionContainer>
         <MainContainer>
           <DeathPiece>
             {
@@ -252,6 +292,11 @@ class ChessBoard extends React.Component<{}, IState> {
               )}
           </DeathPiece>
         </MainContainer>
+        <ActionContainer>
+          <TimeContainer>
+            {this.state.timer.black/2}
+          </TimeContainer>
+        </ActionContainer>
         {/* <button onClick={this.initialPices} >Reset</button> */}
       </div>
     );
