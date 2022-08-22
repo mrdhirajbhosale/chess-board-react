@@ -112,6 +112,7 @@ class ChessBoard extends React.Component<{}, IState> {
       timer: {white: 0, black: 0},
       timerStart: true
     }
+    console.log('constructor');
   }
 
   updateTimer(): void {
