@@ -2,25 +2,12 @@ import React from 'react';
 import ChessBoard from './components/ChessBoard';
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
-import reducer from './reducer';
+import chessBoardApp from './reducers';
 
-
-const reducers = (state: any, action: any) => {
-  switch (action.type) {
-    case "PRE":
-      return {};
-    case "NEXT":
-      return {};
-    default:
-      return {};
-  }
-};
-
-const store = createStore(reducers)
+const store = createStore(chessBoardApp)
+console.log('store',store);
 
 class App extends React.Component {
-
-
 
   render() {
     return (

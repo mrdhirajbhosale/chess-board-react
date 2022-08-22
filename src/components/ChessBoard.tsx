@@ -76,7 +76,7 @@ type ITimer = {
   black: number
 }
 
-type IState = {
+export type IState = {
   pieces: (IPiece | undefined)[][];
   selected: ISelected;
   deathPieces: IPiece[];
@@ -96,9 +96,9 @@ const COLOR_SIZE : {[key: number]: {color: string, size: string}} = {
   4: {color: '#df1616', size: '1px'},
 }
 
-class ChessBoard extends React.Component<{}, IState> {
+class ChessBoard extends React.Component<any, IState> {
 
-  constructor(props: {}) {
+  constructor(props: any) {
     super(props);
     this.state = {
       pieces: Array.from({ length: 8 }, (__, j) => Array.from({ length: 8 }, (_, i) => undefined)),
@@ -113,6 +113,7 @@ class ChessBoard extends React.Component<{}, IState> {
       timerStart: true
     }
     console.log('constructor');
+    console.log(this);
   }
 
   updateTimer(): void {
