@@ -5,7 +5,6 @@ import { Provider } from 'react-redux'
 import rootReducer from './service/reducers/index'
 
 const store=createStore(rootReducer)
-console.log('store',store);
 
 class App extends React.Component {
 

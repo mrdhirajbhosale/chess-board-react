@@ -6,12 +6,14 @@ import { IState } from "../../components/ChessBoard"
 const chessBoardData: IState[] = [];
 
 export default function chessBoardItems(state = chessBoardData, action: any) {
-    switch (action.type) {
-        case 'ADD_TO_LIST':
-            return [
-                ...state, action.data
-            ];
-        default:
-            return state;
-    }
+  switch (action.type) {
+    case 'ADD_TO_LIST':
+      return [
+        ...state, action.data
+      ];
+    case 'INITIAL_LIST':
+      return [action.data]
+    default:
+      return state;
+  }
 }

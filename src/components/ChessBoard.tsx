@@ -49,7 +49,7 @@ const ActionContainer = styled(RowFlex)`
 
 const TimeContainer = styled.div`
   margin: 10px;
-  width: 40px;
+  width: 100px;
   height: 40px;
   border: 1px solid;
   align-items: center;
@@ -60,7 +60,7 @@ const TimeContainer = styled.div`
 const Button = styled.button`
   height: 40px;
   width: 70px;
-  margin-left: 10px;
+  margin: 10px;
 `;
 
 type ISelected = {
@@ -77,11 +77,6 @@ type IKingChecks = {
   [key: string]: ICell[]
 }
 
-type ITimer = {
-  white: number,
-  black: number
-}
-
 export type IState = {
   pieces: (IPiece | undefined)[][];
   selected: ISelected;
@@ -91,7 +86,7 @@ export type IState = {
   kingChecks: IKingChecks;
   kingCell: IKingCell;
   afterCheckMoves: ICell[][];
-  timer: ITimer;
+  timer: string;
   timerStart: Boolean;
   id: number;
 }
@@ -116,16 +111,25 @@ class ChessBoard extends React.Component<any, IState> {
       kingChecks: {},
       kingCell: { white: { row: 0, column: 0 }, black: { row: 0, column: 0 } },
       afterCheckMoves: [],
-      timer: { white: 0, black: 0 },
+      timer: '00:00:00:00',
       timerStart: true,
-      id: -1
+      id: 0
     }
   }
 
   updateTimer(): void {
+    const countDownDate: number = new Date().getTime();
     setInterval(() => {
-      const { timer, turn } = this.state;
-      timer[turn] = timer[turn] + 1;
+      const now: number = new Date().getTime();
+      const timeleft: number = now - countDownDate;
+      const days: number = Math.floor(timeleft / (1000 * 60 * 60 * 24));
+      const hours: number = Math.floor((timeleft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes: number = Math.floor((timeleft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds: number = Math.floor((timeleft % (1000 * 60)) / 1000);
+      const timer = `${days > 9 ? days : '0' + days.toString()}:` +
+        `${hours > 9 ? hours : '0' + hours.toString()}:` +
+        `${minutes > 9 ? minutes : '0' + minutes.toString()}:` +
+        `${seconds > 9 ? seconds : '0' + seconds.toString()}`;
       this.setState({ timer });
     }, 1000);
   }
@@ -176,7 +180,7 @@ class ChessBoard extends React.Component<any, IState> {
       },
       id: 0
     })
-    this.props.addToListHandler(clone(this.state));
+    this.props.initialListHandler(clone({...this.state, pieces, id: 0 }));
   }
 
   componentDidMount() {
@@ -202,7 +206,7 @@ class ChessBoard extends React.Component<any, IState> {
     const { pieces, selected, deathPieces, kingCell, id } = this.state;
     console.log('id', id);
     let turn = this.state.turn;
-    console.log(this.state);
+    console.log(this.props);
     if (piece && selected.piece && piece.color !== selected.piece.color) {
       deathPieces.push(piece);
       pieces[row][column] = selected.piece;
@@ -219,8 +223,8 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, deathPieces, pieces, turn, posibleMoves: [], id: id+1 });
-      this.props.addToListHandler(clone(this.state));
+      this.setState({ selected, deathPieces, pieces, turn, posibleMoves: [], id: id + 1 });
+      this.props.addToListHandler(clone({...this.state, selected, pieces, turn, posibleMoves: [], id: id + 1 }));
     } else if (piece) {
       selected.row = row;
       selected.column = column;
@@ -244,8 +248,8 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, pieces, turn, posibleMoves: [], id: id+1 });
-      this.props.addToListHandler(clone(this.state));
+      this.setState({ selected, pieces, turn, posibleMoves: [], id: id + 1 });
+      this.props.addToListHandler(clone({...this.state, selected, pieces, turn, posibleMoves: [], id: id + 1 }));
     }
   }
 
@@ -263,11 +267,15 @@ class ChessBoard extends React.Component<any, IState> {
   }
 
   onClickPre() {
-    console.log(this.props)
+    console.log(this.state.id);
+    console.log(this.props.data.chessBoardItems);
+    this.setState(this.props.data.chessBoardItems[this.state.id-1]);
   }
 
   onClickNext() {
-    console.log(this.props)
+    console.log(this.state.id);
+    console.log(this.props.data.chessBoardItems);
+    this.setState(this.props.data.chessBoardItems[this.state.id+1]);
   }
 
   render() {
@@ -275,7 +283,7 @@ class ChessBoard extends React.Component<any, IState> {
       <>
         <ActionContainer>
           <TimeContainer>
-            {this.state.timer.white / 2}
+            {this.state.timer}
           </TimeContainer>
         </ActionContainer>
         <MainContainer>
@@ -315,13 +323,8 @@ class ChessBoard extends React.Component<any, IState> {
           </DeathPiece>
         </MainContainer>
         <ActionContainer>
-          <TimeContainer>
-            {this.state.timer.black / 2}
-          </TimeContainer>
-        </ActionContainer>
-        <ActionContainer>
-          <Button onClick={this.onClickPre}>Previous</Button>
-          <Button onClick={this.onClickNext}>Next</Button>
+          <Button onClick={() => this.onClickPre()}>Previous</Button>
+          <Button onClick={() => this.onClickNext()}>Next</Button>
         </ActionContainer>
         {/* <button onClick={this.initialPices} >Reset</button> */}
       </>

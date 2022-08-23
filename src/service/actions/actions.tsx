@@ -1,9 +1,20 @@
 import { IState } from "../../components/ChessBoard"
 
-export const addToList = (data: IState)=>{
-    console.warn("action",data)
-    return {
-        type: 'ADD_TO_LIST',
-        data: data
-    }
+
+let nextItemId = 0
+export const addToList = (data: IState) => {
+    console.log('data', data);
+  return {
+    type: 'ADD_TO_LIST',
+    id: nextItemId++,
+    data: data
+  }
+}
+
+export const initialList = (data: IState) => {
+  return {
+    type: 'INITIAL_LIST',
+    id: nextItemId++,
+    data: data
+  }
 }
