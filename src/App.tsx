@@ -1,10 +1,10 @@
 import React from 'react';
-import ChessBoard from './components/ChessBoard';
+import ChessBoard from './container/ChessBoardContainer';
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
-import chessBoardApp from './reducers';
+import rootReducer from './service/reducers/index'
 
-const store = createStore(chessBoardApp)
+const store=createStore(rootReducer)
 console.log('store',store);
 
 class App extends React.Component {

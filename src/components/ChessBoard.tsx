@@ -112,8 +112,6 @@ class ChessBoard extends React.Component<any, IState> {
       timer: {white: 0, black: 0},
       timerStart: true
     }
-    console.log('constructor');
-    console.log(this);
   }
 
   updateTimer(): void {
@@ -210,6 +208,7 @@ class ChessBoard extends React.Component<any, IState> {
         turn = 'black'
       }
       this.setState({ selected, deathPieces, pieces, turn, posibleMoves: [] });
+      this.props.addToListHandler(this.state);
     } else if (piece) {
       selected.row = row;
       selected.column = column;
@@ -234,6 +233,7 @@ class ChessBoard extends React.Component<any, IState> {
         turn = 'black'
       }
       this.setState({ selected, pieces, turn, posibleMoves: [] });
+      this.props.addToListHandler(this.state);
     }
   }
 
