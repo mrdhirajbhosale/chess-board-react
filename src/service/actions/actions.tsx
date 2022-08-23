@@ -3,7 +3,6 @@ import { IState } from "../../components/ChessBoard"
 
 let nextItemId = 0
 export const addToList = (data: IState) => {
-    console.log('data', data);
   return {
     type: 'ADD_TO_LIST',
     id: nextItemId++,

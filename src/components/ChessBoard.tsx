@@ -35,6 +35,9 @@ const DeathPiece = styled.div`
   width: 100px;
   height: 405px;
   flex-wrap: wrap;
+  border: 1px;
+  border-style: double;
+  margin: 0 10px;
 `
 
 const RowFlex = styled.div`
@@ -204,9 +207,7 @@ class ChessBoard extends React.Component<any, IState> {
 
   onClickCell(row: number, column: number, piece: IPiece | undefined) {
     const { pieces, selected, deathPieces, kingCell, id } = this.state;
-    console.log('id', id);
     let turn = this.state.turn;
-    console.log(this.props);
     if (piece && selected.piece && piece.color !== selected.piece.color) {
       deathPieces.push(piece);
       pieces[row][column] = selected.piece;
@@ -267,14 +268,10 @@ class ChessBoard extends React.Component<any, IState> {
   }
 
   onClickPre() {
-    console.log(this.state.id);
-    console.log(this.props.data.chessBoardItems);
     this.setState(this.props.data.chessBoardItems[this.state.id-1]);
   }
 
   onClickNext() {
-    console.log(this.state.id);
-    console.log(this.props.data.chessBoardItems);
     this.setState(this.props.data.chessBoardItems[this.state.id+1]);
   }
 
