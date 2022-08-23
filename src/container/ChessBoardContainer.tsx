@@ -7,6 +7,5 @@ const mapStateToProps = (state: IState) => ({
 })
 const mapDispatchToProps = (dispatch: (arg0: any) => any) => ({
   addToListHandler: (data: IState) => dispatch(addToList(data))
-
 })
 export default connect(mapStateToProps, mapDispatchToProps)(ChessBoard)

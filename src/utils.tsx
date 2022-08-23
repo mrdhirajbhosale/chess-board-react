@@ -1,5 +1,16 @@
 import { ICell, IPiece } from "./svg/Piece";
 
+export function clone(obj: any){
+  if(obj == null || typeof(obj) != 'object')
+      return obj;
+
+  var temp = new obj.constructor();
+  for(var key in obj)
+      temp[key] = clone(obj[key]);
+
+  return temp;
+}
+
 export function king_movement(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {
     let moves: ICell[] = [];
     moves.push({row: cell.row, column: cell.column+1})

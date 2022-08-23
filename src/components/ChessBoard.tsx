@@ -7,7 +7,7 @@ import { Pawn } from '../svg/Pawn';
 import { ICell, IPiece } from '../svg/Piece';
 import { Queen } from '../svg/Queen';
 import { Rook } from '../svg/Rook';
-import { check_king_check, moves_in_king_and_opponent } from '../utils';
+import { check_king_check, clone, moves_in_king_and_opponent } from '../utils';
 
 const MainContainer = styled.div`
   display: flex;
@@ -57,6 +57,12 @@ const TimeContainer = styled.div`
   display: flex;
 `;
 
+const Button = styled.button`
+  height: 40px;
+  width: 70px;
+  margin-left: 10px;
+`;
+
 type ISelected = {
   row: number,
   column: number,
@@ -86,14 +92,15 @@ export type IState = {
   kingCell: IKingCell;
   afterCheckMoves: ICell[][];
   timer: ITimer;
-  timerStart: Boolean
+  timerStart: Boolean;
+  id: number;
 }
 
-const COLOR_SIZE : {[key: number]: {color: string, size: string}} = {
-  1: {color: '#df1616', size: '2px'},
-  2: {color: '#4d79ff', size: '2px'},
-  3: {color: '#a79d9d', size: '1px'},
-  4: {color: '#df1616', size: '1px'},
+const COLOR_SIZE: { [key: number]: { color: string, size: string } } = {
+  1: { color: '#df1616', size: '2px' },
+  2: { color: '#4d79ff', size: '2px' },
+  3: { color: '#a79d9d', size: '1px' },
+  4: { color: '#df1616', size: '1px' },
 }
 
 class ChessBoard extends React.Component<any, IState> {
@@ -109,8 +116,9 @@ class ChessBoard extends React.Component<any, IState> {
       kingChecks: {},
       kingCell: { white: { row: 0, column: 0 }, black: { row: 0, column: 0 } },
       afterCheckMoves: [],
-      timer: {white: 0, black: 0},
-      timerStart: true
+      timer: { white: 0, black: 0 },
+      timerStart: true,
+      id: -1
     }
   }
 
@@ -118,7 +126,7 @@ class ChessBoard extends React.Component<any, IState> {
     setInterval(() => {
       const { timer, turn } = this.state;
       timer[turn] = timer[turn] + 1;
-      this.setState({timer});
+      this.setState({ timer });
     }, 1000);
   }
 
@@ -162,11 +170,13 @@ class ChessBoard extends React.Component<any, IState> {
     pieces[6] = Array.from({ length: 8 }, (_, i) => blackPawn);
     this.setState({
       pieces,
-      kingCell: { 
+      kingCell: {
         white: { row: 0, column: 3 },
         black: { row: 7, column: 3 }
-      }
+      },
+      id: 0
     })
+    this.props.addToListHandler(clone(this.state));
   }
 
   componentDidMount() {
@@ -178,7 +188,7 @@ class ChessBoard extends React.Component<any, IState> {
     return cells.filter(cell => cell.row === row && cell.column === column).length > 0;
   }
 
-  getKingChecks( selected: ISelected) {
+  getKingChecks() {
     const { kingCell, kingChecks } = this.state;
     let afterCheckMoves: ICell[][] = [];
     kingChecks['white'] = check_king_check(kingCell.white, this.state.pieces, 'white');
@@ -189,16 +199,18 @@ class ChessBoard extends React.Component<any, IState> {
   }
 
   onClickCell(row: number, column: number, piece: IPiece | undefined) {
-    const { pieces, selected, deathPieces, kingCell } = this.state;
+    const { pieces, selected, deathPieces, kingCell, id } = this.state;
+    console.log('id', id);
     let turn = this.state.turn;
+    console.log(this.state);
     if (piece && selected.piece && piece.color !== selected.piece.color) {
       deathPieces.push(piece);
       pieces[row][column] = selected.piece;
       pieces[selected.row][selected.column] = undefined;
-      if (selected.piece?.name === 'king' ){
+      if (selected.piece?.name === 'king') {
         kingCell[selected.piece?.color] = { row, column }
       }
-      this.getKingChecks(selected);
+      this.getKingChecks();
       selected.row = -1;
       selected.column = -1;
       selected.piece = undefined;
@@ -207,8 +219,8 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, deathPieces, pieces, turn, posibleMoves: [] });
-      this.props.addToListHandler(this.state);
+      this.setState({ selected, deathPieces, pieces, turn, posibleMoves: [], id: id+1 });
+      this.props.addToListHandler(clone(this.state));
     } else if (piece) {
       selected.row = row;
       selected.column = column;
@@ -220,10 +232,10 @@ class ChessBoard extends React.Component<any, IState> {
     } else {
       pieces[row][column] = selected.piece;
       pieces[selected.row][selected.column] = undefined
-      if (selected.piece?.name === 'king' ){
+      if (selected.piece?.name === 'king') {
         kingCell[selected.piece?.color] = { row, column }
       }
-      this.getKingChecks(selected);
+      this.getKingChecks();
       selected.row = -1;
       selected.column = -1;
       selected.piece = undefined;
@@ -232,8 +244,8 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, pieces, turn, posibleMoves: [] });
-      this.props.addToListHandler(this.state);
+      this.setState({ selected, pieces, turn, posibleMoves: [], id: id+1 });
+      this.props.addToListHandler(clone(this.state));
     }
   }
 
@@ -241,13 +253,21 @@ class ChessBoard extends React.Component<any, IState> {
     if (Object.values(this.state.kingChecks).filter(moves => this.isCellPresent(row, column, moves)).length > 0) {
       return 1;
     }
-    if(this.state.afterCheckMoves.filter(moves => this.isCellPresent(row, column, moves)).length > 0){
+    if (this.state.afterCheckMoves.filter(moves => this.isCellPresent(row, column, moves)).length > 0) {
       return 4;
     }
-    if(this.isCellPresent(row, column, this.state.posibleMoves)) {
+    if (this.isCellPresent(row, column, this.state.posibleMoves)) {
       return 2;
     }
     return 3;
+  }
+
+  onClickPre() {
+    console.log(this.props)
+  }
+
+  onClickNext() {
+    console.log(this.props)
   }
 
   render() {
@@ -255,7 +275,7 @@ class ChessBoard extends React.Component<any, IState> {
       <>
         <ActionContainer>
           <TimeContainer>
-            {this.state.timer.white/2}
+            {this.state.timer.white / 2}
           </TimeContainer>
         </ActionContainer>
         <MainContainer>
@@ -296,8 +316,12 @@ class ChessBoard extends React.Component<any, IState> {
         </MainContainer>
         <ActionContainer>
           <TimeContainer>
-            {this.state.timer.black/2}
+            {this.state.timer.black / 2}
           </TimeContainer>
+        </ActionContainer>
+        <ActionContainer>
+          <Button onClick={this.onClickPre}>Previous</Button>
+          <Button onClick={this.onClickNext}>Next</Button>
         </ActionContainer>
         {/* <button onClick={this.initialPices} >Reset</button> */}
       </>
