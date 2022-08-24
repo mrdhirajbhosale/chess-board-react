@@ -1,19 +1,27 @@
 import { IState } from "../../components/ChessBoard"
 
-
-let nextItemId = 0
-export const addToList = (data: IState) => {
+export const initialList = (data: IState) => {
   return {
-    type: 'ADD_TO_LIST',
-    id: nextItemId++,
+    type: 'INITIAL_LIST',
     data: data
   }
 }
 
-export const initialList = (data: IState) => {
+export const addToList = (data: IState) => {
   return {
-    type: 'INITIAL_LIST',
-    id: nextItemId++,
+    type: 'ADD_TO_LIST',
     data: data
+  }
+}
+
+export const previousState = () => {
+  return {
+    type: 'PREVIOUS'
+  }
+}
+
+export const nextState = () => {
+  return {
+    type: 'NEXT'
   }
 }
