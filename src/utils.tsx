@@ -1,57 +1,62 @@
 import { ICell, IPiece } from "./svg/Piece";
 
-export function clone(obj: any){
-  if(obj == null || typeof(obj) != 'object')
-      return obj;
+export function clone(obj: any) {
+  if (obj == null || typeof (obj) != 'object')
+    return obj;
 
   var temp = new obj.constructor();
-  for(var key in obj)
-      temp[key] = clone(obj[key]);
+  for (var key in obj)
+    temp[key] = clone(obj[key]);
 
   return temp;
 }
 
 export function king_movement(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {
-    let moves: ICell[] = [];
-    moves.push({row: cell.row, column: cell.column+1})
-    moves.push({row: cell.row, column: cell.column-1})
-    moves.push({row: cell.row+1, column: cell.column})
-    moves.push({row: cell.row-1, column: cell.column})
-    moves.push({row: cell.row+1, column: cell.column+1})
-    moves.push({row: cell.row+1, column: cell.column-1})
-    moves.push({row: cell.row-1, column: cell.column-1})
-    moves.push({row: cell.row-1, column: cell.column+1})
-    return moves.filter(move => (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === color));
+  let moves: ICell[] = [];
+  moves.push({ row: cell.row, column: cell.column + 1 })
+  moves.push({ row: cell.row, column: cell.column - 1 })
+  moves.push({ row: cell.row + 1, column: cell.column })
+  moves.push({ row: cell.row - 1, column: cell.column })
+  moves.push({ row: cell.row + 1, column: cell.column + 1 })
+  moves.push({ row: cell.row + 1, column: cell.column - 1 })
+  moves.push({ row: cell.row - 1, column: cell.column - 1 })
+  moves.push({ row: cell.row - 1, column: cell.column + 1 })
+  return moves.filter(move => (0 <= move.row && move.row <= 7) && (0 <= move.column && move.column <= 7) && !(pieces[move.row][move.column]?.color === color));
 }
 
 export function pawn_movement(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {
-  const moves: ICell[] = []
-  if (color === 'white') {
-    if (cell.row === 1 && pieces[cell.row + 2][cell.column] === undefined) {
-      moves.push({ row: cell.row + 2, column: cell.column })
+  const moves: ICell[] = [];
+  try {
+    if (color === 'white') {
+      if (cell.row === 1 && pieces[cell.row + 2][cell.column] === undefined) {
+        moves.push({ row: cell.row + 2, column: cell.column })
+      }
+      if (pieces[cell.row + 1][cell.column] === undefined) {
+        moves.push({ row: cell.row + 1, column: cell.column })
+      }
+      if (pieces[cell.row + 1][cell.column + 1]?.color === 'black') {
+        moves.push({ row: cell.row + 1, column: cell.column + 1 })
+      }
+      if (pieces[cell.row + 1][cell.column - 1]?.color === 'black') {
+        moves.push({ row: cell.row + 1, column: cell.column - 1 })
+      }
+    } else {
+      if (cell.row === 6 && pieces[cell.row - 2][cell.column] === undefined) {
+        moves.push({ row: cell.row - 2, column: cell.column })
+      }
+      if (pieces[cell.row - 1][cell.column] === undefined) {
+        moves.push({ row: cell.row - 1, column: cell.column })
+      }
+      if (pieces[cell.row - 1][cell.column - 1]?.color === 'white') {
+        moves.push({ row: cell.row - 1, column: cell.column - 1 })
+      }
+      if (pieces[cell.row - 1][cell.column + 1]?.color === 'white') {
+        moves.push({ row: cell.row - 1, column: cell.column + 1 })
+      }
     }
-    if (pieces[cell.row + 1][cell.column] === undefined) {
-      moves.push({ row: cell.row + 1, column: cell.column })
-    }
-    if (pieces[cell.row + 1][cell.column + 1]?.color === 'black') {
-      moves.push({ row: cell.row + 1, column: cell.column + 1 })
-    }
-    if (pieces[cell.row + 1][cell.column - 1]?.color === 'black') {
-      moves.push({ row: cell.row + 1, column: cell.column - 1 })
-    }
-  } else {
-    if (cell.row === 6 && pieces[cell.row - 2][cell.column] === undefined) {
-      moves.push({ row: cell.row - 2, column: cell.column })
-    }
-    if (pieces[cell.row - 1][cell.column] === undefined) {
-      moves.push({ row: cell.row - 1, column: cell.column })
-    }
-    if (pieces[cell.row - 1][cell.column - 1]?.color === 'white') {
-      moves.push({ row: cell.row - 1, column: cell.column - 1 })
-    }
-    if (pieces[cell.row - 1][cell.column + 1]?.color === 'white') {
-      moves.push({ row: cell.row - 1, column: cell.column + 1 })
-    }
+  }
+  catch (error) {
+    console.error(error);
   }
   return moves;
 }
@@ -173,9 +178,9 @@ export function check_king_check(cell: ICell, pieces: (IPiece | undefined)[][], 
   checks = checks.concat(pawnMoves);
   const knightMoves = knight_movement(cell, pieces, color).filter(check => pieces[check.row][check.column]?.name === 'knight')
   checks = checks.concat(knightMoves);
-  const diagonally_moves = move_diagonally(cell, pieces, color).filter(check => ['bishop', 'queen'].includes(pieces[check.row][check.column]?.name|| ''))
+  const diagonally_moves = move_diagonally(cell, pieces, color).filter(check => ['bishop', 'queen'].includes(pieces[check.row][check.column]?.name || ''))
   checks = checks.concat(diagonally_moves);
-  const straight_moves = move_straight(cell, pieces, color).filter(check => ['rook', 'queen'].includes(pieces[check.row][check.column]?.name|| ''))
+  const straight_moves = move_straight(cell, pieces, color).filter(check => ['rook', 'queen'].includes(pieces[check.row][check.column]?.name || ''))
   checks = checks.concat(straight_moves);
   return checks.filter(check =>
     !(pieces[check.row][check.column]?.color === undefined || pieces[check.row][check.column]?.color === color)
@@ -193,31 +198,31 @@ function get_moves_towords_king(king_cell: ICell, other_cell: ICell) {
   var x2 = other_cell.row;
   var y2 = other_cell.column;
   const moves: ICell[] = []
-  if (x1!==x2) {
-    diff_x = x1 - x2 > 0? 1: -1;
-    incr =  diff_x;
+  if (x1 !== x2) {
+    diff_x = x1 - x2 > 0 ? 1 : -1;
+    incr = diff_x;
     startMove = x2;
     endMove = x1;
   }
   if (y1 !== y2) {
-    diff_y = y1 - y2 > 0? 1: -1;
+    diff_y = y1 - y2 > 0 ? 1 : -1;
     incr = diff_y;
     startMove = y2;
     endMove = y1;
   }
-  while(startMove !== endMove) {
-    moves.push({row: x2, column: y2})
-    x2+=diff_x
-    y2+=diff_y
-    startMove+=incr
+  while (startMove !== endMove) {
+    moves.push({ row: x2, column: y2 })
+    x2 += diff_x
+    y2 += diff_y
+    startMove += incr
   }
   return moves;
 }
 
 export function moves_in_king_and_opponent(cell: ICell, king_checks: ICell[], pieces: (IPiece | undefined)[][]) {
   const moves: ICell[][] = [];
-  king_checks.forEach((check)=> {
-    switch(pieces[check.row][check.column]?.name) {
+  king_checks.forEach((check) => {
+    switch (pieces[check.row][check.column]?.name) {
       case 'king':
       case 'knight':
       case 'pawn':
