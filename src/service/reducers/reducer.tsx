@@ -15,7 +15,7 @@ export default function chessBoardItems(state = chessBoardData, action: any) {
     case 'ADD_TO_LIST':
       if (state.current !== undefined)
         return {
-          previous: [state.current, ...state.previous],
+          previous: [...state.previous, state.current],
           current: action.data,
           next: []
         };
@@ -26,16 +26,11 @@ export default function chessBoardItems(state = chessBoardData, action: any) {
         };
     case 'PREVIOUS':
       if (state.previous.length > 0 )
-        {console.log({
-          previous: state.previous.splice(1, state.previous.length ),
-          current: state.previous[0],
-          next: [state.current, ...state.next]
-        });
         return {
-          previous: state.previous.splice(1, state.previous.length ),
-          current: state.previous[0],
+          previous: state.previous.splice(0, state.previous.length-1 ),
+          current: state.previous[state.previous.length-1],
           next: [state.current, ...state.next]
-        };}
+        };
       return state;
     case 'NEXT':
         if (state.next.length > 0 )

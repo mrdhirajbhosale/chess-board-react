@@ -266,17 +266,21 @@ class ChessBoard extends React.Component<any, IState> {
 
   onClickPre() {
     const previousData: IState[] = this.props.data.chessBoardItems.previous;
-    const { pieces, turn } = previousData[previousData.length - 1];
-    this.setState({ pieces, turn });
-    this.props.previousStateHandler();
+    if (previousData.length > 0) {
+      const { pieces, turn } = previousData[previousData.length - 1];
+      this.setState({ pieces, turn });
+      this.props.previousStateHandler();
+    }
     console.log(this.props.data);
   }
 
   onClickNext() {
     const nextData: IState[] = this.props.data.chessBoardItems.next;
-    const { pieces, turn } = nextData[0];
-    this.setState({ pieces, turn })
-    this.props.nextStateHandler()
+    if (nextData.length > 0) {
+      const { pieces, turn } = nextData[0];
+      this.setState({ pieces, turn });
+      this.props.nextStateHandler()
+    }
     console.log(this.props.data);
   }
 
