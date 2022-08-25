@@ -91,7 +91,6 @@ export type IState = {
   afterCheckMoves: ICell[][];
   timer: string;
   timerStart: Boolean;
-  id: number;
 }
 
 const COLOR_SIZE: { [key: number]: { color: string, size: string } } = {
@@ -115,8 +114,7 @@ class ChessBoard extends React.Component<any, IState> {
       kingCell: { white: { row: 0, column: 0 }, black: { row: 0, column: 0 } },
       afterCheckMoves: [],
       timer: '00:00:00:00',
-      timerStart: true,
-      id: 0
+      timerStart: true
     }
   }
 
@@ -180,10 +178,9 @@ class ChessBoard extends React.Component<any, IState> {
       kingCell: {
         white: { row: 0, column: 3 },
         black: { row: 7, column: 3 }
-      },
-      id: 0
+      }
     })
-    this.props.initialListHandler(clone({...this.state, pieces, id: 0 }));
+    this.props.initialListHandler(clone({ ...this.state, pieces }));
   }
 
   componentDidMount() {
@@ -206,7 +203,7 @@ class ChessBoard extends React.Component<any, IState> {
   }
 
   onClickCell(row: number, column: number, piece: IPiece | undefined) {
-    const { pieces, selected, deathPieces, kingCell, id } = this.state;
+    const { pieces, selected, deathPieces, kingCell } = this.state;
     let turn = this.state.turn;
     if (piece && selected.piece && piece.color !== selected.piece.color) {
       deathPieces.push(piece);
@@ -224,8 +221,8 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, deathPieces, pieces, turn, posibleMoves: [], id: id + 1 });
-      this.props.addToListHandler(clone({...this.state, selected, pieces, turn, posibleMoves: [], id: id + 1 }));
+      this.setState({ selected, deathPieces, pieces, turn, posibleMoves: [] });
+      this.props.addToListHandler(clone({ ...this.state, selected, pieces, turn, posibleMoves: [] }));
     } else if (piece) {
       selected.row = row;
       selected.column = column;
@@ -249,8 +246,8 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, pieces, turn, posibleMoves: [], id: id + 1 });
-      this.props.addToListHandler(clone({...this.state, selected, pieces, turn, posibleMoves: [], id: id + 1 }));
+      this.setState({ selected, pieces, turn, posibleMoves: [] });
+      this.props.addToListHandler(clone({ ...this.state, selected, pieces, turn, posibleMoves: [] }));
     }
   }
 
@@ -268,11 +265,19 @@ class ChessBoard extends React.Component<any, IState> {
   }
 
   onClickPre() {
-    this.setState(this.props.data.chessBoardItems[this.state.id-1]);
+    const previousData: IState[] = this.props.data.chessBoardItems.previous;
+    const { pieces, turn } = previousData[previousData.length - 1];
+    this.setState({ pieces, turn });
+    this.props.previousStateHandler();
+    console.log(this.props.data);
   }
 
   onClickNext() {
-    this.setState(this.props.data.chessBoardItems[this.state.id+1]);
+    const nextData: IState[] = this.props.data.chessBoardItems.next;
+    const { pieces, turn } = nextData[0];
+    this.setState({ pieces, turn })
+    this.props.nextStateHandler()
+    console.log(this.props.data);
   }
 
   render() {
