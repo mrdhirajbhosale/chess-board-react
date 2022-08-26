@@ -266,11 +266,17 @@ class ChessBoard extends React.Component<any, IState> {
   }
 
   async onClickPre() {
+    if(this.props.data.chessBoardItems.previous.length === 0) {
+      return;
+    }
     await this.props.previousStateHandler();
     this.setState(clone(this.props.data.chessBoardItems.current));
   }
 
   async onClickNext() {
+    if(this.props.data.chessBoardItems.next.length === 0) {
+      return;
+    }
     await this.props.nextStateHandler();
     this.setState(clone(this.props.data.chessBoardItems.current));
   }

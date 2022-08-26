@@ -59,7 +59,7 @@ export default function chessBoardItems(state = chessBoardData, action: any) {
         //   next: state.next.splice(1, state.next.length)
         // });
         return {
-          previous: [state.current, ...state.previous],
+          previous: [...state.previous, state.current],
           current: state.next[0],
           next: state.next.splice(1, state.next.length)
         };
