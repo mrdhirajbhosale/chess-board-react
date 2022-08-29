@@ -28,7 +28,6 @@ export class Pawn implements IPiece {
   }
   
   movement(cell: ICell, pieces: (IPiece | undefined)[][]) {
-    console.log(cell, pieces, this.color);
     return pawn_movement(cell, pieces, this.color);
   }
 
