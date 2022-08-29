@@ -10,14 +10,12 @@ export type IPredictReduxState = {
   selected: ISelected;
   posibleMoves: ICell[];
   afterCheckMoves: ICell[][];
-  timer: string;
 }
 
 const chessBoardData: IPredictReduxState = {
   selected: { row: -1, column: -1, piece: undefined },
   posibleMoves: [],
-  afterCheckMoves: [],
-  timer: '00:00:00:00'
+  afterCheckMoves: []
 };
 
 type IAction = {

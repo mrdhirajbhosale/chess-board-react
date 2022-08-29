@@ -1,21 +1,16 @@
 import { ICell, IPiece } from "../../svg/Piece"
 
-type IKingChecks = {
+export type IKingChecks = {
   [key: string]: ICell[]
 }
 
-type IReduxState = {
+export type IReduxState = {
   pieces: (IPiece | undefined)[][];
   deathPieces: IPiece[];
-  kingCell: IKingCell;
   kingChecks: IKingChecks;
 }
 
-export type IKingCell = {
-  [key: string]: ICell
-}
-
-type IChessBoardData = {
+export type IChessBoardData = {
   previous: IReduxState[],
   current?: IReduxState,
   next: IReduxState[]

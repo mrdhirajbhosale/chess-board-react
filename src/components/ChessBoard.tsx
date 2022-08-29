@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { IKingChecks } from '../service/reducers/chessBoardItems';
 import { Bishop } from '../svg/Bishop';
 import { King } from '../svg/King';
 import { Knight } from '../svg/Knight';
@@ -7,8 +8,7 @@ import { Pawn } from '../svg/Pawn';
 import { ICell, IPiece } from '../svg/Piece';
 import { Queen } from '../svg/Queen';
 import { Rook } from '../svg/Rook';
-import { check_king_check, clone, moves_in_king_and_opponent } from '../utils';
-import { IKingCell } from '../service/reducers/chessBoardItems';
+import { check_king_check, clone, get_king_positions, moves_in_king_and_opponent } from '../utils';
 
 const MainContainer = styled.div`
   display: flex;
@@ -146,10 +146,6 @@ class ChessBoard extends React.Component<any, IState> {
       pieces,
       deathPieces: [],
       turn: 'white',
-      kingCell: {
-        white: { row: 0, column: 3 },
-        black: { row: 7, column: 3 }
-      },
       kingChecks: {
         black: [],
         white: []
@@ -166,8 +162,9 @@ class ChessBoard extends React.Component<any, IState> {
     return cells.filter(cell => cell.row === row && cell.column === column).length > 0;
   }
 
-  async getKingChecks(pieces: (IPiece | undefined)[][], kingCell: IKingCell) {
+  async getKingChecks(pieces: (IPiece | undefined)[][]) {
     const { kingChecks } = clone(this.props.data.chessBoardItems.current);
+    const kingCell = get_king_positions(pieces);
     let afterCheckMoves: ICell[][] = [];
     kingChecks['white'] = check_king_check(kingCell.white, pieces, 'white');
     kingChecks['black'] = check_king_check(kingCell.black, pieces, 'black');
@@ -179,18 +176,17 @@ class ChessBoard extends React.Component<any, IState> {
 
   async onClickCell(row: number, column: number, piece: IPiece | undefined) {
     const { selected } = this.props.data.chessboardPredict;
-    const { pieces, deathPieces, kingCell } = clone(this.props.data.chessBoardItems.current);
-    console.log(this.props.data.chessboardPredict);
-    let kingChecks = {}
+    const { pieces, deathPieces } = clone(this.props.data.chessBoardItems.current);
+    let kingChecks: IKingChecks = {}
     let turn = this.props.data.chessBoardItems.current.turn;
     if (piece && selected.piece && piece.color !== selected.piece.color) {
       deathPieces.push(piece);
       pieces[row][column] = selected.piece;
       pieces[selected.row][selected.column] = undefined;
-      if (selected.piece?.name === 'king') {
-        kingCell[selected.piece?.color] = { row, column }
+      kingChecks = await this.getKingChecks(pieces);
+      if(kingChecks[turn].length > 0) {
+        return;
       }
-      kingChecks = await this.getKingChecks(pieces, kingCell);
       selected.row = -1;
       selected.column = -1;
       selected.piece = undefined;
@@ -212,10 +208,10 @@ class ChessBoard extends React.Component<any, IState> {
     } else {
       pieces[row][column] = selected.piece;
       pieces[selected.row][selected.column] = undefined
-      if (selected.piece?.name === 'king') {
-        kingCell[selected.piece?.color] = { row, column }
+      kingChecks = await this.getKingChecks(pieces);
+      if(kingChecks[turn].length > 0) {
+        return;
       }
-      kingChecks = await this.getKingChecks(pieces, kingCell);
       selected.row = -1;
       selected.column = -1;
       selected.piece = undefined;

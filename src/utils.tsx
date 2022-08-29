@@ -1,5 +1,9 @@
 import { ICell, IPiece } from "./svg/Piece";
 
+export type IKingCell = {
+  [key: string]: ICell
+}
+
 export function clone(obj: any) {
   if (obj == null || typeof (obj) != 'object')
     return obj;
@@ -9,6 +13,18 @@ export function clone(obj: any) {
     temp[key] = clone(obj[key]);
 
   return temp;
+}
+
+export function get_king_positions(pieces_: (IPiece | undefined)[][]) {
+  const kingCell: IKingCell = {};
+  pieces_.forEach((pieces, row) => {
+    pieces.forEach((piece, column) => {
+      if(piece?.name === 'king'){
+        kingCell[piece.color] = { row, column }
+      }
+    })
+  })
+  return kingCell;
 }
 
 export function king_movement(cell: ICell, pieces: (IPiece | undefined)[][], color: string) {
