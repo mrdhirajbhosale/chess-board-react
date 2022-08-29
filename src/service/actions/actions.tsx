@@ -27,7 +27,6 @@ export const nextState = () => {
   }
 }
 
-
 export const updatePredict = (data: IPredictReduxState) => {
   return {
     type: 'UPDATE_STATE',
