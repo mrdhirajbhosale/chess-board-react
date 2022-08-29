@@ -8,7 +8,7 @@ import { ICell, IPiece } from '../svg/Piece';
 import { Queen } from '../svg/Queen';
 import { Rook } from '../svg/Rook';
 import { check_king_check, clone, moves_in_king_and_opponent } from '../utils';
-import { IKingCell } from '../service/reducers/reducer';
+import { IKingCell } from '../service/reducers/chessBoardItems';
 
 const MainContainer = styled.div`
   display: flex;
@@ -67,16 +67,7 @@ const Button = styled.button`
   margin: 10px;
 `;
 
-type ISelected = {
-  row: number,
-  column: number,
-  piece: IPiece | undefined
-}
-
 export type IState = {
-  selected: ISelected;
-  posibleMoves: ICell[];
-  afterCheckMoves: ICell[][];
   timer: string;
 }
 
@@ -92,9 +83,6 @@ class ChessBoard extends React.Component<any, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      selected: { row: -1, column: -1, piece: undefined },
-      posibleMoves: [],
-      afterCheckMoves: [],
       timer: '00:00:00:00'
     }
   }
@@ -178,21 +166,21 @@ class ChessBoard extends React.Component<any, IState> {
     return cells.filter(cell => cell.row === row && cell.column === column).length > 0;
   }
 
-  getKingChecks(pieces: (IPiece | undefined)[][], kingCell: IKingCell) {
+  async getKingChecks(pieces: (IPiece | undefined)[][], kingCell: IKingCell) {
     const { kingChecks } = clone(this.props.data.chessBoardItems.current);
     let afterCheckMoves: ICell[][] = [];
     kingChecks['white'] = check_king_check(kingCell.white, pieces, 'white');
     kingChecks['black'] = check_king_check(kingCell.black, pieces, 'black');
     afterCheckMoves = moves_in_king_and_opponent(kingCell.white, kingChecks['white'], pieces);
     afterCheckMoves = afterCheckMoves.concat(moves_in_king_and_opponent(kingCell.black, kingChecks['black'], pieces));
-    this.setState({ afterCheckMoves });
+    await this.props.updatePredictHandler({...this.props.data.chessboardPredict, afterCheckMoves})
     return kingChecks;
   }
 
   async onClickCell(row: number, column: number, piece: IPiece | undefined) {
-    console.log(row, column, piece);
-    const { selected } = this.state;
+    const { selected } = this.props.data.chessboardPredict;
     const { pieces, deathPieces, kingCell } = clone(this.props.data.chessBoardItems.current);
+    console.log(this.props.data.chessboardPredict);
     let kingChecks = {}
     let turn = this.props.data.chessBoardItems.current.turn;
     if (piece && selected.piece && piece.color !== selected.piece.color) {
@@ -202,7 +190,7 @@ class ChessBoard extends React.Component<any, IState> {
       if (selected.piece?.name === 'king') {
         kingCell[selected.piece?.color] = { row, column }
       }
-      kingChecks = this.getKingChecks(pieces, kingCell);
+      kingChecks = await this.getKingChecks(pieces, kingCell);
       selected.row = -1;
       selected.column = -1;
       selected.piece = undefined;
@@ -211,23 +199,23 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, posibleMoves: [] });
+      this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
       this.props.addToListHandler(clone({ ...this.props.data.chessBoardItems.current, kingChecks, pieces, turn, deathPieces }));
     } else if (piece) {
       selected.row = row;
       selected.column = column;
       selected.piece = piece;
-      this.setState({
-        selected,
+      this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, 
+        selected, 
         posibleMoves: this.props.data.chessBoardItems.current.pieces[row][column]?.movement({ row, column }, this.props.data.chessBoardItems.current.pieces) || []
-      });
+      }))
     } else {
       pieces[row][column] = selected.piece;
       pieces[selected.row][selected.column] = undefined
       if (selected.piece?.name === 'king') {
         kingCell[selected.piece?.color] = { row, column }
       }
-      kingChecks = this.getKingChecks(pieces, kingCell);
+      kingChecks = await this.getKingChecks(pieces, kingCell);
       selected.row = -1;
       selected.column = -1;
       selected.piece = undefined;
@@ -236,20 +224,19 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.setState({ selected, posibleMoves: [] });
+      this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
       await this.props.addToListHandler(clone({ ...this.props.data.chessBoardItems.current, kingChecks, pieces, turn }));
     }
   }
 
   getBorderColor(row: number, column: number) {
-    //console.log(typeof(this.props.data.chessBoardItems.current.kingChecks['black']))
     if (Object.values(this.props.data.chessBoardItems.current.kingChecks).filter(moves => this.isCellPresent(row, column, moves as ICell[])).length > 0) {
       return 1;
     }
-    if (this.state.afterCheckMoves.filter(moves => this.isCellPresent(row, column, moves)).length > 0) {
+    if (this.props.data.chessboardPredict.afterCheckMoves.filter((moves: ICell[]) => this.isCellPresent(row, column, moves)).length > 0) {
       return 4;
     }
-    if (this.isCellPresent(row, column, this.state.posibleMoves)) {
+    if (this.isCellPresent(row, column, this.props.data.chessboardPredict.posibleMoves)) {
       return 2;
     }
     return 3;
@@ -299,9 +286,9 @@ class ChessBoard extends React.Component<any, IState> {
                           borderColor={COLOR_SIZE[this.getBorderColor(row, column)].color}
                           borderSize={COLOR_SIZE[this.getBorderColor(row, column)].size}
                           disabled={
-                            (!this.isCellPresent(row, column, this.state.posibleMoves) && this.state.selected.piece !== undefined &&
+                            (!this.isCellPresent(row, column, this.props.data.chessboardPredict.posibleMoves) && this.props.data.chessboardPredict.selected.piece !== undefined &&
                               this.props.data.chessBoardItems.current.pieces[row][column]?.color !== this.props.data.chessBoardItems.current.turn) ||
-                            (this.state.selected.piece === undefined &&
+                            (this.props.data.chessboardPredict.selected.piece === undefined &&
                               this.props.data.chessBoardItems.current.pieces[row][column]?.color !== this.props.data.chessBoardItems.current.turn)
                           }
                         >

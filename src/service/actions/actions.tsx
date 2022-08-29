@@ -1,4 +1,5 @@
 import { IState } from "../../components/ChessBoard"
+import { IPredictReduxState } from "../reducers/chessboardPredict"
 
 export const initialList = (data: IState) => {
   return {
@@ -23,5 +24,13 @@ export const previousState = () => {
 export const nextState = () => {
   return {
     type: 'NEXT'
+  }
+}
+
+
+export const updatePredict = (data: IPredictReduxState) => {
+  return {
+    type: 'UPDATE_STATE',
+    data: data
   }
 }

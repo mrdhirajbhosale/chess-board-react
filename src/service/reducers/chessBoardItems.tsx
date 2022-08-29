@@ -24,7 +24,6 @@ type IChessBoardData = {
 const chessBoardData: IChessBoardData = { previous: [], next: [] };
 
 export default function chessBoardItems(state = chessBoardData, action: any) {
-  // console.log('STATE', state);
   switch (action.type) {
     case 'ADD_TO_LIST':
       if (state.current !== undefined) {
