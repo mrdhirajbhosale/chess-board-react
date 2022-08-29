@@ -30,13 +30,13 @@ const Box = styled.button<{ color?: string, borderColor?: string, borderSize?: s
   padding: 2px;
 `;
 
-const DeathPiece = styled.div`
+const DeathPiece = styled.div<{ borderColor?: string }>`
   display: flex;
   flex-direction: column;
   width: 100px;
   height: 405px;
   flex-wrap: wrap;
-  border: 1px;
+  border: 4px solid ${({ borderColor }) => (borderColor ? borderColor : `#a79d9d`)};
   border-style: double;
   margin: 0 10px;
 `
@@ -265,7 +265,7 @@ class ChessBoard extends React.Component<any, IState> {
         {
           this.props.data.chessBoardItems.current !== undefined &&
           <MainContainer>
-            <DeathPiece>
+            <DeathPiece borderColor='#d9c8c8'>
               {
                 this.props.data.chessBoardItems.current.deathPieces &&
                 this.props.data.chessBoardItems.current.deathPieces.filter((piece: IPiece) => piece.color === 'white').map((piece: IPiece, _: number) => piece.icon())
@@ -295,7 +295,7 @@ class ChessBoard extends React.Component<any, IState> {
                   </RowFlex>
                 )}
             </ChessContainer>
-            <DeathPiece>
+            <DeathPiece borderColor='#a96868'>
               {
                 this.props.data.chessBoardItems.current.deathPieces &&
                 this.props.data.chessBoardItems.current.deathPieces.filter((piece: IPiece) => piece.color === 'black').map((piece: IPiece, _: number) => piece.icon())
