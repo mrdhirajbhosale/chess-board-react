@@ -20,6 +20,7 @@ const MainContainer = styled.div`
 const ChessContainer = styled.div`
   display: flex;
   flex-direction: column;
+  padding-top: 7px;
 `;
 
 const Box = styled.button<{ color?: string, borderColor?: string, borderSize?: string }>`
@@ -195,13 +196,13 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
-      this.props.addToListHandler(clone({ ...this.props.data.chessBoardItems.current, kingChecks, pieces, turn, deathPieces }));
+      await this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
+      await this.props.addToListHandler(clone({ ...this.props.data.chessBoardItems.current, kingChecks, pieces, turn, deathPieces }));
     } else if (piece) {
       selected.row = row;
       selected.column = column;
       selected.piece = piece;
-      this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, 
+      await this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, 
         selected, 
         posibleMoves: this.props.data.chessBoardItems.current.pieces[row][column]?.movement({ row, column }, this.props.data.chessBoardItems.current.pieces) || []
       }))
@@ -220,7 +221,7 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
+      await this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
       await this.props.addToListHandler(clone({ ...this.props.data.chessBoardItems.current, kingChecks, pieces, turn }));
     }
   }
@@ -243,7 +244,6 @@ class ChessBoard extends React.Component<any, IState> {
       return;
     }
     await this.props.previousStateHandler();
-    this.setState(clone(this.props.data.chessBoardItems.current));
   }
 
   async onClickNext() {
@@ -251,7 +251,6 @@ class ChessBoard extends React.Component<any, IState> {
       return;
     }
     await this.props.nextStateHandler();
-    this.setState(clone(this.props.data.chessBoardItems.current));
   }
 
   render() {
