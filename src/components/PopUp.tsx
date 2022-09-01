@@ -27,7 +27,6 @@ const CloseButton = styled.button`
   font-weight: 500;
 `
 
-
 type IProp = {
   closeCallback?: () => void;
   children: ReactNode;

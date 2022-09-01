@@ -279,11 +279,21 @@ class ChessBoard extends React.Component<any, IState> {
     return 3;
   }
 
+  async resetPredictState() {
+    await this.getKingChecks(this.props.data.chessBoardItems.current.pieces);
+    await this.props.updatePredictHandler(clone({
+      ...this.props.data.chessboardPredict,
+      selected: { row: -1, column: -1, piece: undefined },
+      posibleMoves: []
+    }))
+  }
+
   async onClickPre() {
     if (this.props.data.chessBoardItems.previous.length === 0) {
       return;
     }
     await this.props.previousStateHandler();
+    await this.resetPredictState();
   }
 
   async onClickNext() {
@@ -291,6 +301,7 @@ class ChessBoard extends React.Component<any, IState> {
       return;
     }
     await this.props.nextStateHandler();
+    await this.resetPredictState();
   }
 
   onClickClose() {
