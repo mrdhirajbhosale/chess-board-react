@@ -1,4 +1,4 @@
-import { IState } from "../../components/ChessBoard"
+import { IState } from "../../pages/ChessBoard"
 import { IPredictReduxState } from "../reducers/chessboardPredict"
 
 export const initialList = (data: IState) => {

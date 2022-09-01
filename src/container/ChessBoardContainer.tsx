@@ -1,4 +1,4 @@
-import ChessBoard, { IState } from '../components/ChessBoard';
+import ChessBoard, { IState } from '../pages/ChessBoard';
 import { connect } from 'react-redux';
 import { addToList, initialList, previousState, nextState, updatePredict } from '../service/actions/actions';
 import { IPredictReduxState } from '../service/reducers/chessboardPredict';

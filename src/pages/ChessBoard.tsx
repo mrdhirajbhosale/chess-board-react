@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import PopUp from '../components/PopUp';
 import { IKingChecks } from '../service/reducers/chessBoardItems';
 import { Bishop } from '../svg/Bishop';
 import { King } from '../svg/King';
@@ -31,6 +32,12 @@ const Box = styled.button<{ color?: string, borderColor?: string, borderSize?: s
   padding: 2px;
 `;
 
+const PopUpContainer = styled.div`
+  width: auto;
+  height: auto;
+  border: 4px solid #a79d9d;
+  padding: 50px;
+`
 const DeathPiece = styled.div<{ borderColor?: string }>`
   display: flex;
   flex-direction: column;
@@ -68,8 +75,15 @@ const Button = styled.button`
   margin: 10px;
 `;
 
+type IPromotePwan = {
+  cell: ICell,
+  color: 'black' | 'white'
+}
+
 export type IState = {
   timer: string;
+  showPopup: boolean;
+  pramotePawn: IPromotePwan | undefined;
 }
 
 const COLOR_SIZE: { [key: number]: { color: string, size: string } } = {
@@ -81,10 +95,19 @@ const COLOR_SIZE: { [key: number]: { color: string, size: string } } = {
 
 class ChessBoard extends React.Component<any, IState> {
 
+  promotePawn: { white: IPiece[], black: IPiece[] }
   constructor(props: any) {
     super(props);
     this.state = {
-      timer: '00:00:00:00'
+      timer: '00:00:00:00',
+      showPopup: true,
+      pramotePawn: undefined
+    }
+    this.onClickClose = this.onClickClose.bind(this);
+    this.onPramotePawn = this.onPramotePawn.bind(this);
+    this.promotePawn = {
+      white: [new Queen('white'), new Bishop('white'), new Knight('white'), new Rook('white')],
+      black: [new Queen('black'), new Bishop('black'), new Knight('black'), new Rook('black')]
     }
   }
 
@@ -171,7 +194,7 @@ class ChessBoard extends React.Component<any, IState> {
     kingChecks['black'] = check_king_check(kingCell.black, pieces, 'black');
     afterCheckMoves = moves_in_king_and_opponent(kingCell.white, kingChecks['white'], pieces);
     afterCheckMoves = afterCheckMoves.concat(moves_in_king_and_opponent(kingCell.black, kingChecks['black'], pieces));
-    await this.props.updatePredictHandler({...this.props.data.chessboardPredict, afterCheckMoves})
+    await this.props.updatePredictHandler({ ...this.props.data.chessboardPredict, afterCheckMoves })
     return kingChecks;
   }
 
@@ -185,8 +208,16 @@ class ChessBoard extends React.Component<any, IState> {
       pieces[row][column] = selected.piece;
       pieces[selected.row][selected.column] = undefined;
       kingChecks = await this.getKingChecks(pieces);
-      if(kingChecks[turn].length > 0) {
+      if (kingChecks[turn].length > 0) {
         return;
+      }
+      if ((row === 7 || row === 0) && selected.piece.name === 'pawn') {
+        this.setState({
+          pramotePawn: {
+            cell: {row, column}, color: selected.piece?.color
+          },
+          showPopup: true
+        }) 
       }
       selected.row = -1;
       selected.column = -1;
@@ -196,22 +227,31 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      await this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
+      await this.props.updatePredictHandler(clone({ ...this.props.data.chessboardPredict, selected, posibleMoves: [] }))
       await this.props.addToListHandler(clone({ ...this.props.data.chessBoardItems.current, kingChecks, pieces, turn, deathPieces }));
     } else if (piece) {
       selected.row = row;
       selected.column = column;
       selected.piece = piece;
-      await this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, 
-        selected, 
+      await this.props.updatePredictHandler(clone({
+        ...this.props.data.chessboardPredict,
+        selected,
         posibleMoves: this.props.data.chessBoardItems.current.pieces[row][column]?.movement({ row, column }, this.props.data.chessBoardItems.current.pieces) || []
       }))
     } else {
       pieces[row][column] = selected.piece;
       pieces[selected.row][selected.column] = undefined
       kingChecks = await this.getKingChecks(pieces);
-      if(kingChecks[turn].length > 0) {
+      if (kingChecks[turn].length > 0) {
         return;
+      }
+      if ((row === 7 || row === 0) && selected.piece.name === 'pawn') {
+        this.setState({
+          pramotePawn: {
+            cell: {row, column}, color: selected.piece.color
+          },
+          showPopup: true
+        }) 
       }
       selected.row = -1;
       selected.column = -1;
@@ -221,7 +261,7 @@ class ChessBoard extends React.Component<any, IState> {
       } else {
         turn = 'black'
       }
-      await this.props.updatePredictHandler(clone({...this.props.data.chessboardPredict, selected, posibleMoves: []}))
+      await this.props.updatePredictHandler(clone({ ...this.props.data.chessboardPredict, selected, posibleMoves: [] }))
       await this.props.addToListHandler(clone({ ...this.props.data.chessBoardItems.current, kingChecks, pieces, turn }));
     }
   }
@@ -251,6 +291,24 @@ class ChessBoard extends React.Component<any, IState> {
       return;
     }
     await this.props.nextStateHandler();
+  }
+
+  onClickClose() {
+    this.setState({
+      showPopup: false
+    });
+  }
+
+  onPramotePawn(piece: IPiece) {
+    if(this.state.pramotePawn !== undefined) {
+      const { pieces } = this.props.data.chessBoardItems.current;
+      const { row, column } = this.state.pramotePawn.cell;
+      pieces[row][column] = piece;
+    }
+    this.setState({
+      pramotePawn: undefined,
+      showPopup: false
+    });
   }
 
   render() {
@@ -306,7 +364,26 @@ class ChessBoard extends React.Component<any, IState> {
           <Button onClick={() => this.onClickPre()}>Previous</Button>
           <Button onClick={() => this.onClickNext()}>Next</Button>
         </ActionContainer>
-        {/* <button onClick={this.initialPices} >Reset</button> */}
+        {
+          this.state.showPopup && this.state.pramotePawn !== undefined &&
+          <PopUp>
+            <PopUpContainer>
+            <RowFlex>
+              {
+                this.promotePawn[this.state.pramotePawn?.color].map((piece, _) =>
+                  <Box onClick={() => this.onPramotePawn(piece)}
+                    color={'#a96868'}
+                    borderColor={COLOR_SIZE[3].color}
+                    borderSize={COLOR_SIZE[3].size}
+                  >
+                    {piece?.icon()}
+                  </Box>
+                )
+              }
+            </RowFlex>
+            </PopUpContainer>
+          </PopUp>
+        }
       </>
     );
   }
